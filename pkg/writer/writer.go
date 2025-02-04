@@ -88,6 +88,7 @@ func MakeLanguageAndToolList(l map[string][2]interface{}, totalSize int) string 
             "![%s](https://img.shields.io/badge/%s-%05.2f%%25-%s?&logo=%s&labelColor=151b23)\n",
             k, k, percentage, c[1:], k,
         ))
+    }
 
     return "**💬 Languages & Tools**\n\n" + res.String() + "\n\n"
 }
