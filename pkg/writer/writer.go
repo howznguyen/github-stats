@@ -67,14 +67,27 @@ func MakeLanguageAndToolList(l map[string][2]interface{}, totalSize int) string 
 
     res := strings.Builder{}
     for _, k := range sortMapByValue(sizeMap) {
+        // Validate and type assert value[0] as string
         c, ok := l[k][0].(string)
         if !ok {
             fmt.Printf("Skipping key %s: value[0] is not a string (%v)\n", k, l[k][0])
             continue
         }
+
+        // Ensure c is long enough for slicing
+        if len(c) < 2 {
+            fmt.Printf("Skipping key %s: value[0] is too short (%v)\n", k, c)
+            continue
+        }
+
+        // Ensure totalSize is not zero to avoid division by zero
         s := sizeMap[k]
-        res.WriteString(fmt.Sprintf("![%s](https://img.shields.io/badge/%s-%05.2f%%25-%s?&logo=%s&labelColor=151b23)\n", k, k, float64(s)/float64(totalSize)*100, c[1:], k))
-    }
+        percentage := float64(s) / float64(totalSize) * 100
+
+        res.WriteString(fmt.Sprintf(
+            "![%s](https://img.shields.io/badge/%s-%05.2f%%25-%s?&logo=%s&labelColor=151b23)\n",
+            k, k, percentage, c[1:], k,
+        ))
 
     return "**💬 Languages & Tools**\n\n" + res.String() + "\n\n"
 }
