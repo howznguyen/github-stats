@@ -43,24 +43,40 @@ func (w WeekTime) String() string {
 
 // MakeLanguageAndToolList returns a list of languages and tools used in the repositories
 func MakeLanguageAndToolList(l map[string][2]interface{}, totalSize int) string {
-	if len(l) == 0 {
-		return ""
-	}
+    if len(l) == 0 {
+        return "No data available"
+    }
 
-	// Create a map to store the sizes for sorting
-	sizeMap := make(map[string]int)
-	for key, value := range l {
-		sizeMap[key] = value[1].(int)
-	}
+    // Create a map to store the sizes for sorting
+    sizeMap := make(map[string]int)
+    for key, value := range l {
+        if len(value) < 2 {
+            fmt.Printf("Skipping key %s: value does not have two elements\n", key)
+            continue
+        }
 
-	res := strings.Builder{}
-	for _, k := range sortMapByValue(sizeMap) {
-		c := l[k][0].(string)
-		s := l[k][1].(int)
-		res.WriteString(fmt.Sprintf("![%s](https://img.shields.io/badge/%s-%05.2f%%25-%s?&logo=%s&labelColor=151b23)\n", k, k, float64(s)/float64(totalSize)*100, c[1:], k))
-	}
+        // Type checking for value[1]
+        size, ok := value[1].(int)
+        if !ok {
+            fmt.Printf("Skipping key %s: value[1] is not an int (%v)\n", key, value[1])
+            continue
+        }
 
-	return "**💬 Languages & Tools**\n\n" + res.String() + "\n\n"
+        sizeMap[key] = size
+    }
+
+    res := strings.Builder{}
+    for _, k := range sortMapByValue(sizeMap) {
+        c, ok := l[k][0].(string)
+        if !ok {
+            fmt.Printf("Skipping key %s: value[0] is not a string (%v)\n", k, l[k][0])
+            continue
+        }
+        s := sizeMap[k]
+        res.WriteString(fmt.Sprintf("![%s](https://img.shields.io/badge/%s-%05.2f%%25-%s?&logo=%s&labelColor=151b23)\n", k, k, float64(s)/float64(totalSize)*100, c[1:], k))
+    }
+
+    return "**💬 Languages & Tools**\n\n" + res.String() + "\n\n"
 }
 
 // MakeWakaActivityList returns a list of activities
